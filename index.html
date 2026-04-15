@@ -1,371 +1,209 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YOUR COMPANY NAME • AR Card</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui;
-            background: #000;
-        }
-        /* AR SCENE - full bleed, no distractions */
-        .ar-scene {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AR Business Card</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+<style>
+body {
+    margin:0;
+    overflow:hidden;
+    font-family: -apple-system, BlinkMacSystemFont, system-ui;
+}
+</style>
 </head>
+
 <body>
-    <!-- AR SCENE -->
-    <a-scene class="ar-scene"
-             mindar-image="imageTargetSrc: ./targets.mind;"
-             embedded
-             vr-mode-ui="enabled:false"
-             device-orientation-permission-ui="enabled:false"
-             background="color: #000000">
 
-        <!-- CAMERA with raycaster + cursor for tap interactions -->
-        <a-camera position="0 0 0">
-            <a-entity
-                cursor="rayOrigin: mouse"
-                raycaster="objects: .clickable; far: 5">
-            </a-entity>
-        </a-camera>
+<a-scene
+mindar-image="imageTargetSrc: ./targets.mind;"
+embedded
+vr-mode-ui="enabled:false"
+device-orientation-permission-ui="enabled:false">
 
-        <!-- IMAGE TARGET (the physical printed card) -->
-        <a-entity id="target" mindar-image-target="targetIndex: 0">
+<a-assets>
+<img id="logo" src="./logo.png">
+</a-assets>
 
-            <!-- HOLOGRAM GROUP - parent container for all layered 3D elements -->
-            <!-- All rich content lives here, floating above the physical card -->
-            <a-entity id="hologram-group"
-                      position="0 0.35 0"
-                      scale="1 1 1">
+<a-camera position="0 0 0" cursor="fuse: false; rayOrigin: mouse"
+raycaster="objects: .clickable"></a-camera>
 
-                <!-- ============================================= -->
-                <!-- 1. BASE LAYER: Soft glowing plane (largest)   -->
-                <!-- Slightly larger than card, soft cyan glow     -->
-                <!-- Creates the "floating holographic base"       -->
-                <!-- ============================================= -->
-                <a-plane id="base-glow"
-                         position="0 -0.05 0"
-                         width="1.25"
-                         height="0.85"
-                         material="color: #0ea5e9; 
-                                   transparent: true; 
-                                   opacity: 0.18; 
-                                   side: double; 
-                                   shader: flat;">
-                </a-plane>
+<a-entity id="target" mindar-image-target="targetIndex: 0">
 
-                <!-- Extra glow layers (multiple semi-transparent circles) -->
-                <!-- Creates depth + premium Apple-style holographic bloom -->
-                <a-circle position="0 -0.05 0.015"
-                          radius="0.68"
-                          material="color: #22d3ee; transparent: true; opacity: 0.09; side: double;"></a-circle>
+<!-- =========================
+     🌌 BASE HOLOGRAPHIC GLOW
+     ========================= -->
+<a-entity id="glow" position="0 0 0" opacity="0">
+    
+    <a-circle radius="0.8"
+        color="#38bdf8"
+        opacity="0.15">
+    </a-circle>
 
-                <a-circle position="0 -0.05 -0.015"
-                          radius="0.88"
-                          material="color: #67e8f9; transparent: true; opacity: 0.06; side: double;"></a-circle>
+    <a-circle radius="1.1"
+        color="#38bdf8"
+        opacity="0.07"
+        position="0 0 -0.01">
+    </a-circle>
 
-                <!-- ============================================= -->
-                <!-- 2. MIDDLE LAYER: Company logo                 -->
-                <!-- Centered, slightly elevated with Z-depth      -->
-                <!-- ============================================= -->
-                <a-plane id="logo-plane"
-                         position="0 0.08 0.03"
-                         width="0.55"
-                         height="0.28"
-                         material="src: ./logo.png; 
-                                   transparent: true; 
-                                   alphaTest: 0.1; 
-                                   side: double;">
-                </a-plane>
+</a-entity>
 
-                <!-- ============================================= -->
-                <!-- 3. TEXT LAYERS - above logo                   -->
-                <!-- Company name (large) + tagline (smaller)      -->
-                <!-- Z-depth pushes them forward for 3D pop        -->
-                <!-- ============================================= -->
-                <!-- Company Name -->
-                <a-text id="company-name"
-                        value="YOUR COMPANY NAME"
-                        position="0 0.32 0.05"
-                        align="center"
-                        width="0.72"
-                        color="#f0f9ff"
-                        opacity="1"
-                        font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
-                </a-text>
+<!-- =========================
+     🧊 MAIN CONTENT WRAPPER
+     ========================= -->
+<a-entity id="cardContent" position="0 0 0.05" scale="0.8 0.8 0.8">
 
-                <!-- Tagline (smaller, elegant) -->
-                <a-text id="tagline-text"
-                        value="Pioneering Immersive Experiences"
-                        position="0 0.23 0.05"
-                        align="center"
-                        width="0.58"
-                        color="#a5f3fc"
-                        opacity="1">
-                </a-text>
+    <!-- LOGO -->
+    <a-plane
+        src="#logo"
+        width="0.6"
+        height="0.3"
+        position="0 0.25 0"
+        material="transparent:true; opacity:0"
+        id="logoPlane">
+    </a-plane>
 
-                <!-- ============================================= -->
-                <!-- 4. FLOATING ICONS ROW - interactive buttons   -->
-                <!-- Social / contact links, below the content     -->
-                <!-- Slight Z-depth + subtle glow                  -->
-                <!-- ============================================= -->
-                <a-entity position="0 -0.18 0.06"> <!-- row container -->
+    <!-- COMPANY NAME -->
+    <a-text
+        value="YOUR COMPANY NAME"
+        align="center"
+        color="#FFFFFF"
+        width="2"
+        position="0 0.55 0"
+        opacity="0"
+        id="titleText">
+    </a-text>
 
-                    <!-- Icon 1: Website -->
-                    <a-entity position="-0.27 0 0">
-                        <a-plane id="icon-website"
-                                 class="clickable"
-                                 width="0.13"
-                                 height="0.13"
-                                 material="color: #0ea5e9; 
-                                           transparent: true; 
-                                           opacity: 0.25; 
-                                           side: double;">
-                        </a-plane>
-                        <a-text value="🌐"
-                                position="0 0 0.02"
-                                align="center"
-                                width="0.09"
-                                color="#ffffff">
-                        </a-text>
-                    </a-entity>
+    <!-- TAGLINE -->
+    <a-text
+        value="Immersive AR Experiences"
+        align="center"
+        color="#38bdf8"
+        width="2"
+        position="0 0.4 0"
+        opacity="0"
+        id="taglineText">
+    </a-text>
 
-                    <!-- Icon 2: Email -->
-                    <a-entity position="-0.09 0 0">
-                        <a-plane id="icon-email"
-                                 class="clickable"
-                                 width="0.13"
-                                 height="0.13"
-                                 material="color: #0ea5e9; 
-                                           transparent: true; 
-                                           opacity: 0.25; 
-                                           side: double;">
-                        </a-plane>
-                        <a-text value="✉️"
-                                position="0 0 0.02"
-                                align="center"
-                                width="0.09"
-                                color="#ffffff">
-                        </a-text>
-                    </a-entity>
+    <!-- =========================
+         🔘 BUTTON ROW
+         ========================= -->
+    <a-entity position="0 -0.1 0">
 
-                    <!-- Icon 3: Instagram -->
-                    <a-entity position="0.09 0 0">
-                        <a-plane id="icon-instagram"
-                                 class="clickable"
-                                 width="0.13"
-                                 height="0.13"
-                                 material="color: #0ea5e9; 
-                                           transparent: true; 
-                                           opacity: 0.25; 
-                                           side: double;">
-                        </a-plane>
-                        <a-text value="📷"
-                                position="0 0 0.02"
-                                align="center"
-                                width="0.09"
-                                color="#ffffff">
-                        </a-text>
-                    </a-entity>
+        <!-- WEBSITE BUTTON -->
+        <a-plane
+            class="clickable"
+            color="#ffffff"
+            width="0.5"
+            height="0.18"
+            position="-0.3 0 0"
+            opacity="0.9"
+            id="websiteBtn">
+        </a-plane>
 
-                    <!-- Icon 4: LinkedIn -->
-                    <a-entity position="0.27 0 0">
-                        <a-plane id="icon-linkedin"
-                                 class="clickable"
-                                 width="0.13"
-                                 height="0.13"
-                                 material="color: #0ea5e9; 
-                                           transparent: true; 
-                                           opacity: 0.25; 
-                                           side: double;">
-                        </a-plane>
-                        <a-text value="💼"
-                                position="0 0 0.02"
-                                align="center"
-                                width="0.09"
-                                color="#ffffff">
-                        </a-text>
-                    </a-entity>
-                </a-entity>
+        <a-text
+            value="Website"
+            align="center"
+            color="#000"
+            width="2"
+            position="-0.3 0 0.01">
+        </a-text>
 
-                <!-- ============================================= -->
-                <!-- SUBTLE IDLE ANIMATIONS (always active)        -->
-                <!-- Floating + very slow rotation                  -->
-                <!-- ============================================= -->
-                <!-- Gentle floating (up/down) -->
-                <a-animation attribute="position"
-                             from="0 0.35 0"
-                             to="0 0.38 0"
-                             dur="2800"
-                             easing="easeInOutSine"
-                             loop="true"
-                             direction="alternate"></a-animation>
+        <!-- EMAIL BUTTON -->
+        <a-plane
+            class="clickable"
+            color="#38bdf8"
+            width="0.5"
+            height="0.18"
+            position="0.3 0 0"
+            opacity="0.9"
+            id="emailBtn">
+        </a-plane>
 
-                <!-- Very subtle rotation (premium holographic feel) -->
-                <a-animation attribute="rotation"
-                             from="0 0 0"
-                             to="0 3.5 0"
-                             dur="18000"
-                             easing="linear"
-                             loop="true"></a-animation>
+        <a-text
+            value="Email"
+            align="center"
+            color="#000"
+            width="2"
+            position="0.3 0 0.01">
+        </a-text>
 
-            </a-entity>
-        </a-entity>
-    </a-scene>
+    </a-entity>
 
-    <script>
-        /**
-         * Main script for the futuristic holographic AR business card
-         * - Entrance animation triggered when target is found
-         * - Idle floating + subtle rotation
-         * - Clickable holographic icons using raycaster
-         * - Fully self-contained, mobile-optimized, no external UI panel
-         */
-        window.addEventListener('load', () => {
-            const target = document.querySelector('#target');
-            const hologramGroup = document.querySelector('#hologram-group');
+</a-entity>
 
-            // === ENTRANCE ANIMATION (when target is found) ===
-            // fade in + scale + upward movement for premium "appear from nothing" feel
-            target.addEventListener('targetFound', () => {
-                console.log('%c🎟️ Holographic card detected – starting entrance animation', 'color:#67e8f9; font-weight:bold');
+</a-entity>
+</a-scene>
 
-                // Reset to entrance start state (slightly smaller + lower)
-                hologramGroup.setAttribute('scale', '0.82 0.82 0.82');
-                hologramGroup.setAttribute('position', '0 0.28 0');
+<script>
+const target = document.querySelector("#target");
 
-                // Entrance: scale up with elegant elastic feel
-                hologramGroup.setAttribute('animation__entrance-scale', {
-                    property: 'scale',
-                    from: '0.82 0.82 0.82',
-                    to: '1 1 1',
-                    dur: 1100,
-                    easing: 'easeOutElastic',
-                    loop: false
-                });
+target.addEventListener("targetFound", () => {
 
-                // Entrance: smooth upward float
-                hologramGroup.setAttribute('animation__entrance-pos', {
-                    property: 'position',
-                    from: '0 0.28 0',
-                    to: '0 0.35 0',
-                    dur: 1100,
-                    easing: 'easeOutQuad',
-                    loop: false
-                });
+    // GLOW FADE IN
+    document.querySelector("#glow").setAttribute("animation", {
+        property: "opacity",
+        to: 1,
+        dur: 600,
+        easing: "easeOutQuad"
+    });
 
-                // Individual layer fade-ins (staggered for depth)
-                // Logo
-                const logo = document.querySelector('#logo-plane');
-                if (logo) {
-                    logo.setAttribute('material', 'opacity: 0');
-                    logo.setAttribute('animation__fade-logo', {
-                        property: 'material.opacity',
-                        from: 0,
-                        to: 1,
-                        dur: 900,
-                        delay: 150,
-                        easing: 'easeOutQuad'
-                    });
-                }
+    // CONTENT SCALE + RISE
+    document.querySelector("#cardContent").setAttribute("animation", {
+        property: "scale",
+        from: "0.8 0.8 0.8",
+        to: "1 1 1",
+        dur: 600,
+        easing: "easeOutBack"
+    });
 
-                // Company name
-                const nameText = document.querySelector('#company-name');
-                if (nameText) {
-                    nameText.setAttribute('opacity', '0');
-                    nameText.setAttribute('animation__fade-name', {
-                        property: 'opacity',
-                        from: 0,
-                        to: 1,
-                        dur: 800,
-                        delay: 350,
-                        easing: 'easeOutQuad'
-                    });
-                }
+    document.querySelector("#cardContent").setAttribute("animation__y", {
+        property: "position",
+        from: "0 0 0.05",
+        to: "0 0.05 0.05",
+        dur: 600,
+        easing: "easeOutQuad"
+    });
 
-                // Tagline
-                const taglineText = document.querySelector('#tagline-text');
-                if (taglineText) {
-                    taglineText.setAttribute('opacity', '0');
-                    taglineText.setAttribute('animation__fade-tagline', {
-                        property: 'opacity',
-                        from: 0,
-                        to: 1,
-                        dur: 800,
-                        delay: 500,
-                        easing: 'easeOutQuad'
-                    });
-                }
-
-                // Base glow also fades in smoothly
-                const baseGlow = document.querySelector('#base-glow');
-                if (baseGlow) {
-                    baseGlow.setAttribute('material', 'opacity: 0.05');
-                    baseGlow.setAttribute('animation__fade-base', {
-                        property: 'material.opacity',
-                        from: 0.05,
-                        to: 0.18,
-                        dur: 1200,
-                        delay: 50,
-                        easing: 'easeOutQuad'
-                    });
-                }
-            });
-
-            // === INTERACTIVE ICONS (tap with cursor + raycaster) ===
-            // All URLs are placeholders – replace with your real links
-            const iconConfigs = {
-                'icon-website': {
-                    type: 'web',
-                    url: 'https://yourcompany.com',
-                    name: 'Website'
-                },
-                'icon-email': {
-                    type: 'email',
-                    url: 'mailto:hello@yourcompany.com',
-                    name: 'Email'
-                },
-                'icon-instagram': {
-                    type: 'web',
-                    url: 'https://www.instagram.com/yourcompany',
-                    name: 'Instagram'
-                },
-                'icon-linkedin': {
-                    type: 'web',
-                    url: 'https://www.linkedin.com/company/yourcompany',
-                    name: 'LinkedIn'
-                }
-            };
-
-            Object.keys(iconConfigs).forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.addEventListener('click', (evt) => {
-                        evt.stopImmediatePropagation();
-                        const config = iconConfigs[id];
-                        
-                        console.log(`%c🔗 Tapped ${config.name}`, 'color:#67e8f9');
-                        
-                        if (config.type === 'web') {
-                            window.open(config.url, '_blank');
-                        } else if (config.type === 'email') {
-                            window.location.href = config.url;
-                        }
-                    });
-                }
-            });
-
-            console.log('%c🚀 Premium holographic AR business card ready. All content now lives in 3D space above the card.', 'color:#67e8f9; font-size:13px');
+    // FADE ELEMENTS IN
+    ["logoPlane","titleText","taglineText"].forEach(id=>{
+        document.querySelector("#"+id).setAttribute("animation",{
+            property:"opacity",
+            from:0,
+            to:1,
+            dur:800,
+            easing:"easeOutQuad"
         });
-    </script>
+    });
+
+    // FLOATING IDLE ANIMATION
+    document.querySelector("#cardContent").setAttribute("animation__float", {
+        property: "position",
+        dir: "alternate",
+        dur: 3000,
+        loop: true,
+        to: "0 0.07 0.05",
+        easing: "easeInOutSine"
+    });
+
+});
+
+
+// =========================
+// 🔗 INTERACTIONS
+// =========================
+
+document.querySelector("#websiteBtn").addEventListener("click", () => {
+    window.open("https://yourwebsite.com", "_blank");
+});
+
+document.querySelector("#emailBtn").addEventListener("click", () => {
+    window.location.href = "mailto:you@company.com";
+});
+</script>
+
 </body>
 </html>
