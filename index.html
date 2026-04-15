@@ -1,188 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Waypoint VR • AR Card</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Waypoint VR • AR Card</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui;
+      overflow: hidden;
+      background: transparent;
+    }
 
-<style>
-body { margin:0; font-family: system-ui; overflow:hidden; }
+    .ar-scene {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+    }
 
-.ar-scene {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-}
+    #ui-panel {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      width: 92%;
+      max-width: 420px;
+      z-index: 10;
+      backdrop-filter: blur(18px);
+      background: rgba(0, 0, 0, 0.42);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      color: white;
+      pointer-events: auto;
+      overflow: hidden;
+    }
 
-/* FLOATING UI PANEL */
-#ui-panel {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 92%;
-    max-width: 420px;
-    z-index: 10;
-    backdrop-filter: blur(20px);
-    background: rgba(0,0,0,0.55);
-    border-radius: 24px;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-    animation: floatUp .4s ease;
-}
+    .carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
 
-@keyframes floatUp {
-    from { transform: translate(-50%,40px); opacity:0; }
-    to { transform: translate(-50%,0); opacity:1; }
-}
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
 
-.carousel {
-    display:flex;
-    overflow-x:auto;
-    scroll-snap-type:x mandatory;
-}
+    .slide {
+      min-width: 100%;
+      padding: 20px;
+      scroll-snap-align: start;
+      box-sizing: border-box;
+    }
 
-.slide {
-    min-width:100%;
-    padding:20px;
-    scroll-snap-align:start;
-}
+    .nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.16);
+    }
 
-</style>
+    .nav-btn:active {
+      transform: scale(0.97);
+    }
+  </style>
 </head>
 
 <body>
+  <!-- AR -->
+  <a-scene
+    class="ar-scene"
+    mindar-image="imageTargetSrc: ./targets.mind;"
+    embedded
+    vr-mode-ui="enabled:false"
+    device-orientation-permission-ui="enabled:false"
+    renderer="alpha: true; colorManagement: true; physicallyCorrectLights: true"
+  >
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-<!-- AR -->
-<a-scene class="ar-scene"
-mindar-image="imageTargetSrc: ./targets.mind;"
-embedded
-vr-mode-ui="enabled:false"
-device-orientation-permission-ui="enabled:false">
+    <a-entity id="target" mindar-image-target="targetIndex: 0">
+      <a-plane position="0 0.25 0.01" width="0.6" height="0.3" material="src: ./logo.png; transparent: true;"></a-plane>
 
-<a-camera position="0 0 0"></a-camera>
+      <a-entity id="goggles" position="0 0.65 0">
+        <a-box width="0.4" height="0.12" depth="0.04" color="#1f2937"></a-box>
+        <a-animation attribute="position" to="0 0.75 0" dur="2000" direction="alternate" repeat="indefinite"></a-animation>
+      </a-entity>
+    </a-entity>
+  </a-scene>
 
-<a-entity id="target" mindar-image-target="targetIndex: 0">
+  <!-- FLOATING UI -->
+  <div id="ui-panel" class="hidden">
+    <!-- HEADER -->
+    <div class="flex justify-between items-center px-4 pt-3">
+      <a href="https://waypoint-vr.com" target="_blank" rel="noopener noreferrer" aria-label="Open Waypoint VR website">
+        <img src="./logo.png" class="w-10 h-10 rounded-xl" alt="Waypoint VR logo">
+      </a>
+      <button onclick="hideUI()" aria-label="Close panel">✕</button>
+    </div>
 
-<a-plane position="0 0.25 0.01" width="0.6" height="0.3"
-material="src: ./logo.png; transparent: true;"></a-plane>
+    <!-- CAROUSEL -->
+    <div id="carousel" class="carousel">
+      <!-- Slide 1 -->
+      <div class="slide text-center">
+        <a href="https://waypoint-vr.com" target="_blank" rel="noopener noreferrer">
+          <img src="./logo.png" class="w-24 mx-auto mb-4" alt="Waypoint VR logo">
+        </a>
+        <h2 class="text-xl font-semibold">Waypoint VR</h2>
+        <p class="text-sky-300">Immersive AR experiences</p>
+      </div>
 
-<a-entity id="goggles" position="0 0.65 0">
-<a-box width="0.4" height="0.12" depth="0.04" color="#1f2937"></a-box>
+      <!-- Slide 2 VIDEO -->
+      <div class="slide">
+        <h3 class="mb-2">🎥 Demo</h3>
+        <video controls class="w-full rounded-xl">
+          <source src="./AR Promo.mp4" type="video/mp4" />
+        </video>
+      </div>
 
-<a-animation attribute="position"
-to="0 0.75 0"
-dur="2000"
-direction="alternate"
-repeat="indefinite"></a-animation>
-</a-entity>
+      <!-- Slide 3 SOCIAL -->
+      <div class="slide">
+        <h3 class="mb-4">Connect</h3>
+        <div class="flex justify-around text-2xl">
+          <a href="https://www.facebook.com/waypointvr" target="_blank" rel="noopener noreferrer" aria-label="Waypoint VR Facebook">
+            <i class="fa-brands fa-facebook"></i>
+          </a>
+          <a href="https://www.instagram.com/waypointvr" target="_blank" rel="noopener noreferrer" aria-label="Waypoint VR Instagram">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+        </div>
+      </div>
 
-</a-entity>
-</a-scene>
+      <!-- Slide 4 EMAIL -->
+      <div class="slide text-center">
+        <h3 class="mb-4">Contact</h3>
+        <a href="mailto:waypointvr605@gmail.com" class="bg-white text-black px-4 py-3 rounded-xl font-semibold block">
+          waypointvr605@gmail.com
+        </a>
+      </div>
+    </div>
 
-<!-- FLOATING UI -->
-<div id="ui-panel" class="hidden text-white">
+    <!-- CONTROLS -->
+    <div class="flex justify-between px-6 pb-4 pt-2">
+      <button class="nav-btn" onclick="prev()" aria-label="Previous slide">‹</button>
+      <button class="nav-btn" onclick="next()" aria-label="Next slide">›</button>
+    </div>
+  </div>
 
-<!-- HEADER -->
-<div class="flex justify-between items-center px-4 pt-3">
+  <script>
+    let index = 0;
+    const carousel = document.getElementById('carousel');
 
-<a href="https://www.waypoint-vr.com" target="_blank">
-<img src="./logo.png" class="w-10 h-10 rounded-xl">
-</a>
+    function next() {
+      index = Math.min(index + 1, carousel.children.length - 1);
+      carousel.scrollTo({ left: carousel.offsetWidth * index, behavior: 'smooth' });
+    }
 
-<button onclick="hideUI()">✕</button>
-</div>
+    function prev() {
+      index = Math.max(index - 1, 0);
+      carousel.scrollTo({ left: carousel.offsetWidth * index, behavior: 'smooth' });
+    }
 
-<!-- CAROUSEL -->
-<div id="carousel" class="carousel">
+    function showUI() {
+      document.getElementById('ui-panel').classList.remove('hidden');
+    }
 
-<!-- Slide 1 -->
-<div class="slide text-center">
-<img src="./logo.png" class="w-24 mx-auto mb-4">
-<h2 class="text-xl font-semibold">Waypoint VR</h2>
-<p class="text-sky-300">Immersive AR experiences</p>
-</div>
+    function hideUI() {
+      document.getElementById('ui-panel').classList.add('hidden');
+    }
 
-<!-- Slide 2 VIDEO -->
-<div class="slide">
-<h3 class="mb-2">🎥 Demo</h3>
-
-<video controls class="w-full rounded-xl">
-<source src="./AR Promo.mp4" type="video/mp4">
-</video>
-</div>
-
-<!-- Slide 3 SOCIAL -->
-<div class="slide">
-<h3 class="mb-4">Connect</h3>
-
-<div class="flex justify-around text-2xl">
-
-<a href="https://www.facebook.com/" target="_blank">
-<i class="fa-brands fa-facebook"></i>
-</a>
-
-<a href="https://www.instagram.com/" target="_blank">
-<i class="fa-brands fa-instagram"></i>
-</a>
-
-</div>
-</div>
-
-<!-- Slide 4 EMAIL -->
-<div class="slide text-center">
-<h3 class="mb-4">Contact</h3>
-
-<a href="mailto:waypointvr605@gmail.com"
-class="bg-white text-black px-4 py-3 rounded-xl font-semibold block">
-waypointvr605@gmail.com
-</a>
-</div>
-
-</div>
-
-<!-- CONTROLS -->
-<div class="flex justify-between px-6 pb-4 text-2xl">
-<button onclick="prev()">‹</button>
-<button onclick="next()">›</button>
-</div>
-
-</div>
-
-<script>
-let index = 0;
-const carousel = document.getElementById('carousel');
-
-function next(){
-index = Math.min(index+1, carousel.children.length-1);
-carousel.scrollTo({left: carousel.offsetWidth*index, behavior:'smooth'});
-}
-
-function prev(){
-index = Math.max(index-1,0);
-carousel.scrollTo({left: carousel.offsetWidth*index, behavior:'smooth'});
-}
-
-function showUI(){
-document.getElementById('ui-panel').classList.remove('hidden');
-}
-
-function hideUI(){
-document.getElementById('ui-panel').classList.add('hidden');
-}
-
-window.addEventListener('load', () => {
-const target = document.querySelector('#target');
-
-target.addEventListener('targetFound', showUI);
-});
-</script>
-
+    window.addEventListener('load', () => {
+      const target = document.querySelector('#target');
+      target.addEventListener('targetFound', showUI);
+    });
+  </script>
 </body>
 </html>
