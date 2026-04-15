@@ -1,261 +1,304 @@
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Waypoint VR • AR Card</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>YOUR COMPANY NAME • AR Card</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  //cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<style>
-body {
-    margin:0;
-    overflow:hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui;
-}
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-/* AR SCENE */
-.ar-scene {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-}
+    .ar-scene {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+    }
 
-/* ===========================
-   🍎 APPLE-STYLE HOLOGRAM UI
-   =========================== */
+    .loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(10, 18, 35, 0.95), rgba(0, 0, 0, 1));
+      color: white;
+      z-index: 20;
+      font-size: 14px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
 
-#ui-panel {
-    position: fixed;
-    bottom: 22px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 94%;
-    max-width: 440px;
-    z-index: 10;
-
-    /* 🔥 darker, tighter glass */
-    background: rgba(10, 10, 15, 0.5);
-    backdrop-filter: blur(18px) saturate(180%);
-
-    border-radius: 28px;
-    border: 1px solid rgba(255,255,255,0.12);
-
-    box-shadow:
-        0 20px 60px rgba(0,0,0,0.65),
-        inset 0 1px 0 rgba(255,255,255,0.08);
-
-    overflow: hidden;
-
-    animation: floatUp .35s ease;
-}
-
-@keyframes floatUp {
-    from { transform: translate(-50%,30px); opacity:0; }
-    to { transform: translate(-50%,0); opacity:1; }
-}
-
-/* HEADER */
-.header {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding: 14px 16px 8px 16px;
-}
-
-.header img {
-    width:42px;
-    height:42px;
-    border-radius:12px;
-    cursor:pointer;
-}
-
-/* ===========================
-   📱 FULL BLEED CAROUSEL
-   =========================== */
-
-.carousel {
-    display:flex;
-    overflow-x:auto;
-    scroll-snap-type:x mandatory;
-    scroll-behavior:smooth;
-}
-
-/* MUCH LARGER SLIDES */
-.slide {
-    min-width:100%;
-    padding: 18px 18px 26px 18px;
-    scroll-snap-align:start;
-}
-
-/* TEXT SYSTEM (Apple-like hierarchy) */
-h2 {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-}
-
-h3 {
-    font-size: 16px;
-    font-weight: 500;
-    opacity: 0.9;
-}
-
-/* VIDEO / MEDIA FULL WIDTH FEEL */
-.media {
-    width: 100%;
-    border-radius: 16px;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-/* ===========================
-   🌌 HOLOGRAPHIC GLOW BEHIND UI
-   =========================== */
-
-.holo-glow {
-    position: absolute;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle,
-        rgba(56,189,248,0.35),
-        rgba(56,189,248,0.05),
-        transparent 70%
-    );
-    filter: blur(8px);
-
-    /* sits behind UI but in front of camera via AR scene */
-    pointer-events: none;
-}
-</style>
+    .loading.hidden {
+      opacity: 0;
+    }
+  </style>
 </head>
-
 <body>
+  <div id="loading" class="loading">Scanning card…</div>
 
-<!-- AR SCENE -->
-<a-scene class="ar-scene"
-mindar-image="imageTargetSrc: ./targets.mind;"
-embedded
-vr-mode-ui="enabled:false"
-device-orientation-permission-ui="enabled:false">
+  <a-scene
+    class="ar-scene"
+    mindar-image="imageTargetSrc: ./targets.mind;"
+    embedded
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights: true, alpha: true, antialias: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
 
-<a-camera position="0 0 0"></a-camera>
+    <a-assets>
+      <img id="company-logo" src="./logo.png" />
+      <img id="icon-glow" src="./logo.png" />
+    </a-assets>
 
-<a-entity id="target" mindar-image-target="targetIndex: 0">
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false"
+      cursor="fuse: false; rayOrigin: mouse;"
+      raycaster="objects: .clickable; far: 20;">
+    </a-camera>
 
-<!-- LOGO -->
-<a-plane position="0 0.2 0"
-width="0.6" height="0.3"
-material="src: ./logo.png; transparent:true">
-</a-plane>
+    <a-entity id="target" mindar-image-target="targetIndex: 0" visible="false">
 
-<!-- 🌌 SOFT HOLOGRAM GLOW (NO ANIMATION, JUST PRESENCE) -->
-<a-circle position="0 0 0.01"
-radius="0.6"
-color="#38bdf8"
-opacity="0.12">
-</a-circle>
+      <!-- Base holographic glow layer, slightly larger than the physical card -->
+      <a-plane
+        position="0 0 0"
+        rotation="0 0 0"
+        width="1.12"
+        height="0.72"
+        material="color: #38bdf8; transparent: true; opacity: 0.08; emissive: #38bdf8; emissiveIntensity: 0.9; side: double;">
+      </a-plane>
 
-<a-circle position="0 0 -0.01"
-radius="0.9"
-color="#38bdf8"
-opacity="0.06">
-</a-circle>
+      <!-- Soft outer bloom -->
+      <a-circle
+        position="0 0 -0.005"
+        radius="0.72"
+        material="color: #67e8f9; transparent: true; opacity: 0.05; emissive: #67e8f9; emissiveIntensity: 0.6; side: double;">
+      </a-circle>
 
-</a-entity>
-</a-scene>
+      <!-- Subtle shadow / anchor under the stack -->
+      <a-plane
+        position="0 -0.18 -0.01"
+        rotation="-90 0 0"
+        width="0.95"
+        height="0.95"
+        material="color: #000000; transparent: true; opacity: 0.18; side: double;">
+      </a-plane>
 
-<!-- FLOATING UI -->
-<div id="ui-panel" class="hidden text-white">
+      <!-- Main AR content group -->
+      <a-entity
+        id="holo-card"
+        position="0 0.02 0.08"
+        animation="property: position; from: 0 -0.03 0.08; to: 0 0.02 0.08; dur: 900; easing: easeOutCubic; startEvents: targetFound"
+        animation__scale="property: scale; from: 0.8 0.8 0.8; to: 1 1 1; dur: 900; easing: easeOutCubic; startEvents: targetFound"
+        animation__fade="property: material.opacity; from: 0; to: 1; dur: 800; easing: easeOutQuad; startEvents: targetFound">
 
-<div class="header">
-<a href="https://www.waypoint-vr.com" target="_blank">
-<img src="./logo.png">
-</a>
-<button onclick="hideUI()" style="color:white; font-size:18px;">✕</button>
-</div>
+        <!-- Gentle floating motion for the full stack -->
+        <a-entity
+          position="0 0 0"
+          animation="property: position; dir: alternate; dur: 2600; loop: true; easing: easeInOutSine; to: 0 0.02 0">
+          
+          <!-- Middle logo layer -->
+          <a-plane
+            position="0 0.12 0.05"
+            width="0.34"
+            height="0.34"
+            material="src: #company-logo; transparent: true; opacity: 0.98; emissive: #ffffff; emissiveIntensity: 0.18; side: double;">
+          </a-plane>
 
-<!-- CAROUSEL -->
-<div id="carousel" class="carousel">
+          <!-- Glow ring behind logo -->
+          <a-circle
+            position="0 0.11 0.02"
+            radius="0.22"
+            material="color: #38bdf8; transparent: true; opacity: 0.14; emissive: #38bdf8; emissiveIntensity: 1; side: double;">
+          </a-circle>
 
-<!-- SLIDE 1 -->
-<div class="slide text-center">
-<img src="./logo.png" class="w-28 mx-auto mb-3 rounded-2xl">
-<h2>Waypoint VR</h2>
-<p class="text-sky-300 text-sm mt-1">Immersive AR experiences</p>
-</div>
+          <!-- Company name -->
+          <a-text
+            value="YOUR COMPANY NAME"
+            position="0 0.34 0.1"
+            align="center"
+            anchor="center"
+            baseline="center"
+            color="#f8fbff"
+            width="1.8"
+            font="https://cdn.aframe.io/fonts/Exo2SemiBold.fnt"
+            material="transparent: true; opacity: 0.98;">
+          </a-text>
 
-<!-- SLIDE 2 -->
-<div class="slide">
-<h3>Demo</h3>
-<video controls class="media">
-<source src="./AR Promo.mp4" type="video/mp4">
-</video>
-</div>
+          <!-- Tagline -->
+          <a-text
+            value="Premium immersive experiences"
+            position="0 0.22 0.13"
+            align="center"
+            anchor="center"
+            baseline="center"
+            color="#8fdcff"
+            width="1.55"
+            font="https://cdn.aframe.io/fonts/Exo2SemiBold.fnt"
+            material="transparent: true; opacity: 0.82;">
+          </a-text>
 
-<!-- SLIDE 3 -->
-<div class="slide">
-<h3>Connect</h3>
-<div class="flex justify-around text-2xl mt-4">
-<a href="https://www.facebook.com/waypointvr" target="_blank">
-<i class="fa-brands fa-facebook"></i>
-</a>
-<a href="https://www.instagram.com/waypoint.vr" target="_blank">
-<i class="fa-brands fa-instagram"></i>
-</a>
-</div>
-</div>
+          <!-- Fine divider line -->
+          <a-plane
+            position="0 0.14 0.09"
+            width="0.72"
+            height="0.004"
+            material="color: #67e8f9; transparent: true; opacity: 0.35; emissive: #67e8f9; emissiveIntensity: 0.8;">
+          </a-plane>
 
-<!-- SLIDE 4 -->
-<div class="slide text-center">
-<h3>Contact</h3>
-<a href="mailto:waypointvr605@gmail.com"
-class="block mt-4 bg-white text-black px-4 py-3 rounded-xl font-medium">
-waypointvr605@gmail.com
-</a>
-</div>
+          <!-- Icon row -->
+          <a-entity position="0 -0.02 0.15">
+            <!-- Website -->
+            <a-entity
+              class="clickable"
+              geometry="primitive: circle; radius: 0.055"
+              material="color: #0ea5e9; transparent: true; opacity: 0.18; emissive: #0ea5e9; emissiveIntensity: 1; side: double;"
+              position="-0.22 0 0"
+              website-link
+              animation="property: scale; dir: alternate; dur: 2200; loop: true; easing: easeInOutSine; to: 1.06 1.06 1.06">
+              <a-text
+                value=""
+                position="0 0 0.01"
+                align="center"
+                anchor="center"
+                baseline="center"
+                color="#e0f7ff"
+                width="0.6"
+                font="https://cdn.aframe.io/fonts/FontAwesome.fnt">
+              </a-text>
+            </a-entity>
 
-</div>
+            <!-- Email -->
+            <a-entity
+              class="clickable"
+              geometry="primitive: circle; radius: 0.055"
+              material="color: #22c55e; transparent: true; opacity: 0.18; emissive: #22c55e; emissiveIntensity: 1; side: double;"
+              position="0 0 0"
+              email-link
+              animation="property: scale; dir: alternate; dur: 2400; loop: true; easing: easeInOutSine; to: 1.06 1.06 1.06">
+              <a-text
+                value=""
+                position="0 0 0.01"
+                align="center"
+                anchor="center"
+                baseline="center"
+                color="#effff2"
+                width="0.58"
+                font="https://cdn.aframe.io/fonts/FontAwesome.fnt">
+              </a-text>
+            </a-entity>
 
-<!-- CONTROLS -->
-<div class="flex justify-between px-6 pb-4 text-2xl opacity-80">
-<button onclick="prev()">‹</button>
-<button onclick="next()">›</button>
-</div>
+            <!-- Social -->
+            <a-entity
+              class="clickable"
+              geometry="primitive: circle; radius: 0.055"
+              material="color: #a855f7; transparent: true; opacity: 0.18; emissive: #a855f7; emissiveIntensity: 1; side: double;"
+              position="0.22 0 0"
+              social-link
+              animation="property: scale; dir: alternate; dur: 2600; loop: true; easing: easeInOutSine; to: 1.06 1.06 1.06">
+              <a-text
+                value=""
+                position="-0.01 0 0.01"
+                align="center"
+                anchor="center"
+                baseline="center"
+                color="#faf2ff"
+                width="0.58"
+                font="https://cdn.aframe.io/fonts/FontAwesome.fnt">
+              </a-text>
+            </a-entity>
+          </a-entity>
 
-</div>
+        </a-entity>
+      </a-entity>
 
-<script>
-let index = 0;
-const carousel = document.getElementById('carousel');
+      <!-- Very subtle ambient particles using simple circles -->
+      <a-circle
+        position="-0.34 0.24 0.02"
+        radius="0.03"
+        material="color: #ffffff; transparent: true; opacity: 0.14; emissive: #67e8f9; emissiveIntensity: 1;">
+      </a-circle>
+      <a-circle
+        position="0.34 -0.04 0.02"
+        radius="0.02"
+        material="color: #ffffff; transparent: true; opacity: 0.10; emissive: #38bdf8; emissiveIntensity: 1;">
+      </a-circle>
+      <a-circle
+        position="-0.28 -0.16 0.03"
+        radius="0.018"
+        material="color: #ffffff; transparent: true; opacity: 0.09; emissive: #a855f7; emissiveIntensity: 1;">
+      </a-circle>
+    </a-entity>
+  </a-scene>
 
-function next(){
-    index = Math.min(index+1, carousel.children.length-1);
-    carousel.scrollTo({left: carousel.offsetWidth*index, behavior:'smooth'});
-}
+  <script>
+    AFRAME.registerComponent('website-link', {
+      init: function () {
+        this.el.addEventListener('click', function () {
+          window.open('https://www.yourcompanyname.com', '_blank', 'noopener,noreferrer');
+        });
+      }
+    });
 
-function prev(){
-    index = Math.max(index-1,0);
-    carousel.scrollTo({left: carousel.offsetWidth*index, behavior:'smooth'});
-}
+    AFRAME.registerComponent('email-link', {
+      init: function () {
+        this.el.addEventListener('click', function () {
+          window.location.href = 'mailto:hello@yourcompanyname.com';
+        });
+      }
+    });
 
-function showUI(){
-    document.getElementById('ui-panel').classList.remove('hidden');
-}
+    AFRAME.registerComponent('social-link', {
+      init: function () {
+        this.el.addEventListener('click', function () {
+          window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+        });
+      }
+    });
 
-function hideUI(){
-    document.getElementById('ui-panel').classList.add('hidden');
-}
+    window.addEventListener('load', () => {
+      const sceneEl = document.querySelector('a-scene');
+      const targetEl = document.querySelector('#target');
+      const loadingEl = document.getElementById('loading');
 
-window.addEventListener('load', () => {
-    const target = document.querySelector('#target');
-    target.addEventListener('targetFound', showUI);
-});
-</script>
+      const showCard = () => {
+        targetEl.setAttribute('visible', 'true');
+        loadingEl.classList.add('hidden');
+        setTimeout(() => loadingEl.style.display = 'none', 350);
+      };
 
+      const hideCard = () => {
+        targetEl.setAttribute('visible', 'false');
+        loadingEl.style.display = 'flex';
+        loadingEl.classList.remove('hidden');
+        loadingEl.textContent = 'Scanning card…';
+      };
+
+      targetEl.addEventListener('targetFound', showCard);
+      targetEl.addEventListener('targetLost', hideCard);
+
+      sceneEl.addEventListener('renderstart', () => {
+        const camera = sceneEl.camera && sceneEl.camera.el;
+        if (camera) {
+          camera.setAttribute('position', '0 0 0');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
