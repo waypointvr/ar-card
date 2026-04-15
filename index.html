@@ -3,267 +3,186 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>AR Business Card • Waypoint VR</title>
+<title>Waypoint VR • AR Card</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-:root {
-  --tw-color-primary: #0ea5e9;
-}
-
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  overflow: hidden;
-  background: #000;
-}
+body { margin:0; font-family: system-ui; overflow:hidden; }
 
 .ar-scene {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
 }
 
+/* FLOATING UI PANEL */
 #ui-panel {
-  animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: fixed;
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%);
-  width: min(96vw, 720px);
-  z-index: 60;
-  max-height: 42vh;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 420px;
+    z-index: 10;
+    backdrop-filter: blur(20px);
+    background: rgba(0,0,0,0.55);
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    animation: floatUp .4s ease;
 }
 
-@keyframes slideUp {
-  0% { transform: translateX(-50%) translateY(90px); opacity: 0; }
-  100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+@keyframes floatUp {
+    from { transform: translate(-50%,40px); opacity:0; }
+    to { transform: translate(-50%,0); opacity:1; }
 }
 
-.carousel-container {
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
+.carousel {
+    display:flex;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
 }
 
-.carousel-slide {
-  scroll-snap-align: start;
-  flex: 0 0 100%;
+.slide {
+    min-width:100%;
+    padding:20px;
+    scroll-snap-align:start;
 }
+
 </style>
 </head>
 
-<body class="text-white">
+<body>
 
-<a-scene
-  id="ar-scene"
-  class="ar-scene"
-  mindar-image="imageTargetSrc: ./targets.mind; showStats: false; uiScanning: #scanning-overlay;"
-  color-space="sRGB"
-  renderer="colorManagement: true, physicallyCorrectLights: true"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
-  embedded>
+<!-- AR -->
+<a-scene class="ar-scene"
+mindar-image="imageTargetSrc: ./targets.mind;"
+embedded
+vr-mode-ui="enabled:false"
+device-orientation-permission-ui="enabled:false">
 
-  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+<a-camera position="0 0 0"></a-camera>
 
-  <a-entity id="target" mindar-image-target="targetIndex: 0">
-    <a-plane
-      id="logo-plane"
-      position="0 0.25 0.01"
-      rotation="0 0 0"
-      width="0.6"
-      height="0.3"
-      material="src: ./logo.png; transparent: true; side: double">
-    </a-plane>
+<a-entity id="target" mindar-image-target="targetIndex: 0">
 
-    <a-entity id="goggles" position="0 0.65 0" scale="0.8 0.8 0.8">
-      <a-box position="0 0 0" width="0.42" height="0.12" depth="0.04" color="#1f2937" material="metalness: 0.9; roughness: 0.2"></a-box>
-      <a-ring position="-0.13 0 0.02" radius-inner="0.055" radius-outer="0.075" rotation="90 0 0" color="#111827"></a-ring>
-      <a-ring position="0.13 0 0.02" radius-inner="0.055" radius-outer="0.075" rotation="90 0 0" color="#111827"></a-ring>
-      <a-circle position="-0.13 0 0.025" radius="0.055" rotation="90 0 0" color="#0ea5e9" opacity="0.65" material="side: double; transparent: true"></a-circle>
-      <a-circle position="0.13 0 0.025" radius="0.055" rotation="90 0 0" color="#0ea5e9" opacity="0.65" material="side: double; transparent: true"></a-circle>
-      <a-box position="0 0.02 0.01" width="0.08" height="0.04" depth="0.03" color="#1f2937"></a-box>
+<a-plane position="0 0.25 0.01" width="0.6" height="0.3"
+material="src: ./logo.png; transparent: true;"></a-plane>
 
-      <a-animation
-        attribute="position"
-        to="0 0.72 0"
-        dur="2200"
-        easing="ease-in-out"
-        direction="alternate"
-        repeat="indefinite"></a-animation>
-    </a-entity>
+<a-entity id="goggles" position="0 0.65 0">
+<a-box width="0.4" height="0.12" depth="0.04" color="#1f2937"></a-box>
 
-    <a-text
-      position="0 -0.35 0.01"
-      value="Scan complete ✓"
-      align="center"
-      color="#ffffff"
-      width="0.8"
-      scale="0.8 0.8 0.8"></a-text>
-  </a-entity>
+<a-animation attribute="position"
+to="0 0.75 0"
+dur="2000"
+direction="alternate"
+repeat="indefinite"></a-animation>
+</a-entity>
+
+</a-entity>
 </a-scene>
 
-<div id="scanning-overlay" class="fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-50 pointer-events-none">
-  <div class="text-center max-w-xs">
-    <div class="mx-auto w-16 h-16 border-4 border-sky-400 border-t-transparent rounded-full animate-spin mb-6"></div>
-    <h1 class="text-2xl font-semibold mb-2">Point your camera at the business card</h1>
-    <p class="text-sky-200 text-sm">No app required • Works instantly in your browser</p>
-    <div class="mt-8 text-xs text-gray-400 flex items-center justify-center gap-2">
-      <i class="fa-solid fa-qrcode"></i>
-      This page was opened from the QR code on your card
-    </div>
-  </div>
+<!-- FLOATING UI -->
+<div id="ui-panel" class="hidden text-white">
+
+<!-- HEADER -->
+<div class="flex justify-between items-center px-4 pt-3">
+
+<a href="https://www.waypoint-vr.com" target="_blank">
+<img src="./logo.png" class="w-10 h-10 rounded-xl">
+</a>
+
+<button onclick="hideUI()">✕</button>
 </div>
 
-<div id="ui-panel" class="hidden bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden">
-  <div class="px-5 pt-4 pb-2 flex items-center justify-between border-b border-white/10">
-    <a href="https://www.waypoint-vr.com" target="_blank" rel="noopener noreferrer" class="flex items-center">
-      <img src="./logo.png" alt="Waypoint VR Logo" class="w-10 h-10 object-contain rounded-xl">
-    </a>
+<!-- CAROUSEL -->
+<div id="carousel" class="carousel">
 
-    <button onclick="hideUI()" class="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-2xl transition-colors">
-      ✕
-    </button>
-  </div>
+<!-- Slide 1 -->
+<div class="slide text-center">
+<img src="./logo.png" class="w-24 mx-auto mb-4">
+<h2 class="text-xl font-semibold">Waypoint VR</h2>
+<p class="text-sky-300">Immersive AR experiences</p>
+</div>
 
-  <div id="carousel" class="carousel-container flex overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 pb-6 pt-2 gap-4">
+<!-- Slide 2 VIDEO -->
+<div class="slide">
+<h3 class="mb-2">🎥 Demo</h3>
 
-    <div class="carousel-slide bg-white/10 backdrop-blur-xl rounded-3xl p-6 flex flex-col items-center text-center">
-      <img src="./logo.png" alt="Waypoint VR Logo" class="w-28 h-28 object-contain mb-6 rounded-2xl shadow-inner">
-      <h3 class="text-2xl font-semibold text-white mb-1">Welcome to Waypoint VR</h3>
-      <p class="text-sky-200 mb-6">Innovating the future • One AR card at a time</p>
-      <div class="text-xs uppercase tracking-widest text-white/70">Tap the arrows or swipe →</div>
-    </div>
+<video controls class="w-full rounded-xl">
+<source src="./AR Promo.mp4" type="video/mp4">
+</video>
+</div>
 
-    <div class="carousel-slide bg-white/10 backdrop-blur-xl rounded-3xl p-6">
-      <h4 class="font-medium text-white mb-3 flex items-center gap-2">
-        <span class="text-lg">🎥</span> Company Video
-      </h4>
-      <div class="aspect-video bg-black rounded-2xl overflow-hidden shadow-inner">
-        <video
-          id="video-frame"
-          class="w-full h-full object-cover"
-          controls
-          playsinline
-          preload="metadata">
-          <source src="./AR Promo.mp4" type="video/mp4">
-        </video>
-      </div>
-      <p class="text-xs text-white/60 mt-4 text-center">Watch our story in 60 seconds</p>
-    </div>
+<!-- Slide 3 SOCIAL -->
+<div class="slide">
+<h3 class="mb-4">Connect</h3>
 
-    <div class="carousel-slide bg-white/10 backdrop-blur-xl rounded-3xl p-6">
-      <h4 class="font-medium text-white mb-4 flex items-center gap-2">
-        <span class="text-lg">🔗</span> Connect with us
-      </h4>
-      <div class="grid grid-cols-2 gap-4">
-        <a href="https://www.facebook.com/WaypointVR" target="_blank" rel="noopener noreferrer"
-          class="flex flex-col items-center gap-2 bg-white/10 hover:bg-white/20 transition-colors rounded-2xl p-4">
-          <i class="fa-brands fa-facebook text-3xl"></i>
-          <span class="text-sm font-medium">Facebook</span>
-        </a>
-        <a href="https://www.instagram.com/WaypointVR" target="_blank" rel="noopener noreferrer"
-          class="flex flex-col items-center gap-2 bg-white/10 hover:bg-white/20 transition-colors rounded-2xl p-4">
-          <i class="fa-brands fa-instagram text-3xl"></i>
-          <span class="text-sm font-medium">Instagram</span>
-        </a>
-      </div>
-    </div>
+<div class="flex justify-around text-2xl">
 
-    <div class="carousel-slide bg-white/10 backdrop-blur-xl rounded-3xl p-6 flex flex-col justify-center">
-      <h4 class="font-medium text-white mb-6 flex items-center gap-2">
-        <span class="text-lg">📧</span> Get in touch
-      </h4>
-      <a href="mailto:waypointvr605@gmail.com"
-        class="block bg-white text-black font-semibold text-center py-4 rounded-3xl mb-4 hover:scale-105 transition-transform">
-        📩 waypointvr605@gmail.com
-      </a>
-      <div class="mt-auto text-xs text-white/50 text-center pt-8">Built with free MindAR + GitHub Pages</div>
-    </div>
+<a href="https://www.facebook.com/" target="_blank">
+<i class="fa-brands fa-facebook"></i>
+</a>
 
-    <div class="carousel-slide bg-white/10 backdrop-blur-xl rounded-3xl p-6">
-      <h4 class="font-medium text-white mb-4">More AR Experiences</h4>
-      <div class="space-y-4">
-        <div onclick="demoGoggles()"
-          class="bg-white/10 hover:bg-white/20 rounded-3xl p-5 flex items-center gap-4 cursor-pointer transition-all">
-          <div class="w-12 h-12 bg-gradient-to-br from-sky-400 to-blue-600 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">🥽</div>
-          <div class="flex-1">
-            <p class="font-semibold">Try VR Goggles on Face</p>
-            <p class="text-sm text-sky-200">Facial tracking demo — goggles hover above your card</p>
-          </div>
-        </div>
+<a href="https://www.instagram.com/" target="_blank">
+<i class="fa-brands fa-instagram"></i>
+</a>
 
-        <div class="text-xs text-white/60 bg-white/10 rounded-3xl p-4">
-          <strong>Pro tip:</strong> The goggles above are already live in AR when you scan the card.
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
+</div>
 
-  <div class="flex justify-between px-8 pb-6 text-4xl text-white/60">
-    <button onclick="prevSlide()" class="hover:text-white transition-colors">‹</button>
-    <button onclick="nextSlide()" class="hover:text-white transition-colors">›</button>
-  </div>
+<!-- Slide 4 EMAIL -->
+<div class="slide text-center">
+<h3 class="mb-4">Contact</h3>
+
+<a href="mailto:waypointvr605@gmail.com"
+class="bg-white text-black px-4 py-3 rounded-xl font-semibold block">
+waypointvr605@gmail.com
+</a>
+</div>
+
+</div>
+
+<!-- CONTROLS -->
+<div class="flex justify-between px-6 pb-4 text-2xl">
+<button onclick="prev()">‹</button>
+<button onclick="next()">›</button>
+</div>
+
 </div>
 
 <script>
-let currentSlide = 0;
+let index = 0;
 const carousel = document.getElementById('carousel');
 
-function nextSlide() {
-  currentSlide = Math.min(currentSlide + 1, carousel.children.length - 1);
-  carousel.scrollTo({
-    left: carousel.offsetWidth * currentSlide,
-    behavior: 'smooth'
-  });
+function next(){
+index = Math.min(index+1, carousel.children.length-1);
+carousel.scrollTo({left: carousel.offsetWidth*index, behavior:'smooth'});
 }
 
-function prevSlide() {
-  currentSlide = Math.max(currentSlide - 1, 0);
-  carousel.scrollTo({
-    left: carousel.offsetWidth * currentSlide,
-    behavior: 'smooth'
-  });
+function prev(){
+index = Math.max(index-1,0);
+carousel.scrollTo({left: carousel.offsetWidth*index, behavior:'smooth'});
 }
 
-function showUI() {
-  document.getElementById('ui-panel').classList.remove('hidden');
-  document.getElementById('scanning-overlay').classList.add('hidden');
+function showUI(){
+document.getElementById('ui-panel').classList.remove('hidden');
 }
 
-function hideUI() {
-  document.getElementById('ui-panel').classList.add('hidden');
-  document.getElementById('scanning-overlay').classList.remove('hidden');
-}
-
-function demoGoggles() {
-  const goggles = document.getElementById('goggles');
-  if (goggles) {
-    goggles.setAttribute('scale', '1.3 1.3 1.3');
-    setTimeout(() => {
-      goggles.setAttribute('scale', '0.8 0.8 0.8');
-    }, 300);
-  }
-  alert('✅ The VR goggles are already floating above your business card in live AR!');
+function hideUI(){
+document.getElementById('ui-panel').classList.add('hidden');
 }
 
 window.addEventListener('load', () => {
-  const target = document.querySelector('#target');
-  if (!target) return;
+const target = document.querySelector('#target');
 
-  target.addEventListener('targetFound', () => {
-    showUI();
-  });
-
-  target.addEventListener('targetLost', () => {
-  });
+target.addEventListener('targetFound', showUI);
 });
 </script>
+
 </body>
 </html>
