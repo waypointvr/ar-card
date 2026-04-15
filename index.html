@@ -1,304 +1,371 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>YOUR COMPANY NAME • AR Card</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  //cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-  <style>
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #000;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    .ar-scene {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-    }
-
-    .loading {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at center, rgba(10, 18, 35, 0.95), rgba(0, 0, 0, 1));
-      color: white;
-      z-index: 20;
-      font-size: 14px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      pointer-events: none;
-      transition: opacity 0.35s ease;
-    }
-
-    .loading.hidden {
-      opacity: 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YOUR COMPANY NAME • AR Card</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui;
+            background: #000;
+        }
+        /* AR SCENE - full bleed, no distractions */
+        .ar-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+    </style>
 </head>
 <body>
-  <div id="loading" class="loading">Scanning card…</div>
+    <!-- AR SCENE -->
+    <a-scene class="ar-scene"
+             mindar-image="imageTargetSrc: ./targets.mind;"
+             embedded
+             vr-mode-ui="enabled:false"
+             device-orientation-permission-ui="enabled:false"
+             background="color: #000000">
 
-  <a-scene
-    class="ar-scene"
-    mindar-image="imageTargetSrc: ./targets.mind;"
-    embedded
-    color-space="sRGB"
-    renderer="colorManagement: true, physicallyCorrectLights: true, alpha: true, antialias: true"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false">
-
-    <a-assets>
-      <img id="company-logo" src="./logo.png" />
-      <img id="icon-glow" src="./logo.png" />
-    </a-assets>
-
-    <a-camera
-      position="0 0 0"
-      look-controls="enabled: false"
-      cursor="fuse: false; rayOrigin: mouse;"
-      raycaster="objects: .clickable; far: 20;">
-    </a-camera>
-
-    <a-entity id="target" mindar-image-target="targetIndex: 0" visible="false">
-
-      <!-- Base holographic glow layer, slightly larger than the physical card -->
-      <a-plane
-        position="0 0 0"
-        rotation="0 0 0"
-        width="1.12"
-        height="0.72"
-        material="color: #38bdf8; transparent: true; opacity: 0.08; emissive: #38bdf8; emissiveIntensity: 0.9; side: double;">
-      </a-plane>
-
-      <!-- Soft outer bloom -->
-      <a-circle
-        position="0 0 -0.005"
-        radius="0.72"
-        material="color: #67e8f9; transparent: true; opacity: 0.05; emissive: #67e8f9; emissiveIntensity: 0.6; side: double;">
-      </a-circle>
-
-      <!-- Subtle shadow / anchor under the stack -->
-      <a-plane
-        position="0 -0.18 -0.01"
-        rotation="-90 0 0"
-        width="0.95"
-        height="0.95"
-        material="color: #000000; transparent: true; opacity: 0.18; side: double;">
-      </a-plane>
-
-      <!-- Main AR content group -->
-      <a-entity
-        id="holo-card"
-        position="0 0.02 0.08"
-        animation="property: position; from: 0 -0.03 0.08; to: 0 0.02 0.08; dur: 900; easing: easeOutCubic; startEvents: targetFound"
-        animation__scale="property: scale; from: 0.8 0.8 0.8; to: 1 1 1; dur: 900; easing: easeOutCubic; startEvents: targetFound"
-        animation__fade="property: material.opacity; from: 0; to: 1; dur: 800; easing: easeOutQuad; startEvents: targetFound">
-
-        <!-- Gentle floating motion for the full stack -->
-        <a-entity
-          position="0 0 0"
-          animation="property: position; dir: alternate; dur: 2600; loop: true; easing: easeInOutSine; to: 0 0.02 0">
-          
-          <!-- Middle logo layer -->
-          <a-plane
-            position="0 0.12 0.05"
-            width="0.34"
-            height="0.34"
-            material="src: #company-logo; transparent: true; opacity: 0.98; emissive: #ffffff; emissiveIntensity: 0.18; side: double;">
-          </a-plane>
-
-          <!-- Glow ring behind logo -->
-          <a-circle
-            position="0 0.11 0.02"
-            radius="0.22"
-            material="color: #38bdf8; transparent: true; opacity: 0.14; emissive: #38bdf8; emissiveIntensity: 1; side: double;">
-          </a-circle>
-
-          <!-- Company name -->
-          <a-text
-            value="YOUR COMPANY NAME"
-            position="0 0.34 0.1"
-            align="center"
-            anchor="center"
-            baseline="center"
-            color="#f8fbff"
-            width="1.8"
-            font="https://cdn.aframe.io/fonts/Exo2SemiBold.fnt"
-            material="transparent: true; opacity: 0.98;">
-          </a-text>
-
-          <!-- Tagline -->
-          <a-text
-            value="Premium immersive experiences"
-            position="0 0.22 0.13"
-            align="center"
-            anchor="center"
-            baseline="center"
-            color="#8fdcff"
-            width="1.55"
-            font="https://cdn.aframe.io/fonts/Exo2SemiBold.fnt"
-            material="transparent: true; opacity: 0.82;">
-          </a-text>
-
-          <!-- Fine divider line -->
-          <a-plane
-            position="0 0.14 0.09"
-            width="0.72"
-            height="0.004"
-            material="color: #67e8f9; transparent: true; opacity: 0.35; emissive: #67e8f9; emissiveIntensity: 0.8;">
-          </a-plane>
-
-          <!-- Icon row -->
-          <a-entity position="0 -0.02 0.15">
-            <!-- Website -->
+        <!-- CAMERA with raycaster + cursor for tap interactions -->
+        <a-camera position="0 0 0">
             <a-entity
-              class="clickable"
-              geometry="primitive: circle; radius: 0.055"
-              material="color: #0ea5e9; transparent: true; opacity: 0.18; emissive: #0ea5e9; emissiveIntensity: 1; side: double;"
-              position="-0.22 0 0"
-              website-link
-              animation="property: scale; dir: alternate; dur: 2200; loop: true; easing: easeInOutSine; to: 1.06 1.06 1.06">
-              <a-text
-                value=""
-                position="0 0 0.01"
-                align="center"
-                anchor="center"
-                baseline="center"
-                color="#e0f7ff"
-                width="0.6"
-                font="https://cdn.aframe.io/fonts/FontAwesome.fnt">
-              </a-text>
+                cursor="rayOrigin: mouse"
+                raycaster="objects: .clickable; far: 5">
             </a-entity>
+        </a-camera>
 
-            <!-- Email -->
-            <a-entity
-              class="clickable"
-              geometry="primitive: circle; radius: 0.055"
-              material="color: #22c55e; transparent: true; opacity: 0.18; emissive: #22c55e; emissiveIntensity: 1; side: double;"
-              position="0 0 0"
-              email-link
-              animation="property: scale; dir: alternate; dur: 2400; loop: true; easing: easeInOutSine; to: 1.06 1.06 1.06">
-              <a-text
-                value=""
-                position="0 0 0.01"
-                align="center"
-                anchor="center"
-                baseline="center"
-                color="#effff2"
-                width="0.58"
-                font="https://cdn.aframe.io/fonts/FontAwesome.fnt">
-              </a-text>
+        <!-- IMAGE TARGET (the physical printed card) -->
+        <a-entity id="target" mindar-image-target="targetIndex: 0">
+
+            <!-- HOLOGRAM GROUP - parent container for all layered 3D elements -->
+            <!-- All rich content lives here, floating above the physical card -->
+            <a-entity id="hologram-group"
+                      position="0 0.35 0"
+                      scale="1 1 1">
+
+                <!-- ============================================= -->
+                <!-- 1. BASE LAYER: Soft glowing plane (largest)   -->
+                <!-- Slightly larger than card, soft cyan glow     -->
+                <!-- Creates the "floating holographic base"       -->
+                <!-- ============================================= -->
+                <a-plane id="base-glow"
+                         position="0 -0.05 0"
+                         width="1.25"
+                         height="0.85"
+                         material="color: #0ea5e9; 
+                                   transparent: true; 
+                                   opacity: 0.18; 
+                                   side: double; 
+                                   shader: flat;">
+                </a-plane>
+
+                <!-- Extra glow layers (multiple semi-transparent circles) -->
+                <!-- Creates depth + premium Apple-style holographic bloom -->
+                <a-circle position="0 -0.05 0.015"
+                          radius="0.68"
+                          material="color: #22d3ee; transparent: true; opacity: 0.09; side: double;"></a-circle>
+
+                <a-circle position="0 -0.05 -0.015"
+                          radius="0.88"
+                          material="color: #67e8f9; transparent: true; opacity: 0.06; side: double;"></a-circle>
+
+                <!-- ============================================= -->
+                <!-- 2. MIDDLE LAYER: Company logo                 -->
+                <!-- Centered, slightly elevated with Z-depth      -->
+                <!-- ============================================= -->
+                <a-plane id="logo-plane"
+                         position="0 0.08 0.03"
+                         width="0.55"
+                         height="0.28"
+                         material="src: ./logo.png; 
+                                   transparent: true; 
+                                   alphaTest: 0.1; 
+                                   side: double;">
+                </a-plane>
+
+                <!-- ============================================= -->
+                <!-- 3. TEXT LAYERS - above logo                   -->
+                <!-- Company name (large) + tagline (smaller)      -->
+                <!-- Z-depth pushes them forward for 3D pop        -->
+                <!-- ============================================= -->
+                <!-- Company Name -->
+                <a-text id="company-name"
+                        value="YOUR COMPANY NAME"
+                        position="0 0.32 0.05"
+                        align="center"
+                        width="0.72"
+                        color="#f0f9ff"
+                        opacity="1"
+                        font="https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+                </a-text>
+
+                <!-- Tagline (smaller, elegant) -->
+                <a-text id="tagline-text"
+                        value="Pioneering Immersive Experiences"
+                        position="0 0.23 0.05"
+                        align="center"
+                        width="0.58"
+                        color="#a5f3fc"
+                        opacity="1">
+                </a-text>
+
+                <!-- ============================================= -->
+                <!-- 4. FLOATING ICONS ROW - interactive buttons   -->
+                <!-- Social / contact links, below the content     -->
+                <!-- Slight Z-depth + subtle glow                  -->
+                <!-- ============================================= -->
+                <a-entity position="0 -0.18 0.06"> <!-- row container -->
+
+                    <!-- Icon 1: Website -->
+                    <a-entity position="-0.27 0 0">
+                        <a-plane id="icon-website"
+                                 class="clickable"
+                                 width="0.13"
+                                 height="0.13"
+                                 material="color: #0ea5e9; 
+                                           transparent: true; 
+                                           opacity: 0.25; 
+                                           side: double;">
+                        </a-plane>
+                        <a-text value="🌐"
+                                position="0 0 0.02"
+                                align="center"
+                                width="0.09"
+                                color="#ffffff">
+                        </a-text>
+                    </a-entity>
+
+                    <!-- Icon 2: Email -->
+                    <a-entity position="-0.09 0 0">
+                        <a-plane id="icon-email"
+                                 class="clickable"
+                                 width="0.13"
+                                 height="0.13"
+                                 material="color: #0ea5e9; 
+                                           transparent: true; 
+                                           opacity: 0.25; 
+                                           side: double;">
+                        </a-plane>
+                        <a-text value="✉️"
+                                position="0 0 0.02"
+                                align="center"
+                                width="0.09"
+                                color="#ffffff">
+                        </a-text>
+                    </a-entity>
+
+                    <!-- Icon 3: Instagram -->
+                    <a-entity position="0.09 0 0">
+                        <a-plane id="icon-instagram"
+                                 class="clickable"
+                                 width="0.13"
+                                 height="0.13"
+                                 material="color: #0ea5e9; 
+                                           transparent: true; 
+                                           opacity: 0.25; 
+                                           side: double;">
+                        </a-plane>
+                        <a-text value="📷"
+                                position="0 0 0.02"
+                                align="center"
+                                width="0.09"
+                                color="#ffffff">
+                        </a-text>
+                    </a-entity>
+
+                    <!-- Icon 4: LinkedIn -->
+                    <a-entity position="0.27 0 0">
+                        <a-plane id="icon-linkedin"
+                                 class="clickable"
+                                 width="0.13"
+                                 height="0.13"
+                                 material="color: #0ea5e9; 
+                                           transparent: true; 
+                                           opacity: 0.25; 
+                                           side: double;">
+                        </a-plane>
+                        <a-text value="💼"
+                                position="0 0 0.02"
+                                align="center"
+                                width="0.09"
+                                color="#ffffff">
+                        </a-text>
+                    </a-entity>
+                </a-entity>
+
+                <!-- ============================================= -->
+                <!-- SUBTLE IDLE ANIMATIONS (always active)        -->
+                <!-- Floating + very slow rotation                  -->
+                <!-- ============================================= -->
+                <!-- Gentle floating (up/down) -->
+                <a-animation attribute="position"
+                             from="0 0.35 0"
+                             to="0 0.38 0"
+                             dur="2800"
+                             easing="easeInOutSine"
+                             loop="true"
+                             direction="alternate"></a-animation>
+
+                <!-- Very subtle rotation (premium holographic feel) -->
+                <a-animation attribute="rotation"
+                             from="0 0 0"
+                             to="0 3.5 0"
+                             dur="18000"
+                             easing="linear"
+                             loop="true"></a-animation>
+
             </a-entity>
-
-            <!-- Social -->
-            <a-entity
-              class="clickable"
-              geometry="primitive: circle; radius: 0.055"
-              material="color: #a855f7; transparent: true; opacity: 0.18; emissive: #a855f7; emissiveIntensity: 1; side: double;"
-              position="0.22 0 0"
-              social-link
-              animation="property: scale; dir: alternate; dur: 2600; loop: true; easing: easeInOutSine; to: 1.06 1.06 1.06">
-              <a-text
-                value=""
-                position="-0.01 0 0.01"
-                align="center"
-                anchor="center"
-                baseline="center"
-                color="#faf2ff"
-                width="0.58"
-                font="https://cdn.aframe.io/fonts/FontAwesome.fnt">
-              </a-text>
-            </a-entity>
-          </a-entity>
-
         </a-entity>
-      </a-entity>
+    </a-scene>
 
-      <!-- Very subtle ambient particles using simple circles -->
-      <a-circle
-        position="-0.34 0.24 0.02"
-        radius="0.03"
-        material="color: #ffffff; transparent: true; opacity: 0.14; emissive: #67e8f9; emissiveIntensity: 1;">
-      </a-circle>
-      <a-circle
-        position="0.34 -0.04 0.02"
-        radius="0.02"
-        material="color: #ffffff; transparent: true; opacity: 0.10; emissive: #38bdf8; emissiveIntensity: 1;">
-      </a-circle>
-      <a-circle
-        position="-0.28 -0.16 0.03"
-        radius="0.018"
-        material="color: #ffffff; transparent: true; opacity: 0.09; emissive: #a855f7; emissiveIntensity: 1;">
-      </a-circle>
-    </a-entity>
-  </a-scene>
+    <script>
+        /**
+         * Main script for the futuristic holographic AR business card
+         * - Entrance animation triggered when target is found
+         * - Idle floating + subtle rotation
+         * - Clickable holographic icons using raycaster
+         * - Fully self-contained, mobile-optimized, no external UI panel
+         */
+        window.addEventListener('load', () => {
+            const target = document.querySelector('#target');
+            const hologramGroup = document.querySelector('#hologram-group');
 
-  <script>
-    AFRAME.registerComponent('website-link', {
-      init: function () {
-        this.el.addEventListener('click', function () {
-          window.open('https://www.yourcompanyname.com', '_blank', 'noopener,noreferrer');
+            // === ENTRANCE ANIMATION (when target is found) ===
+            // fade in + scale + upward movement for premium "appear from nothing" feel
+            target.addEventListener('targetFound', () => {
+                console.log('%c🎟️ Holographic card detected – starting entrance animation', 'color:#67e8f9; font-weight:bold');
+
+                // Reset to entrance start state (slightly smaller + lower)
+                hologramGroup.setAttribute('scale', '0.82 0.82 0.82');
+                hologramGroup.setAttribute('position', '0 0.28 0');
+
+                // Entrance: scale up with elegant elastic feel
+                hologramGroup.setAttribute('animation__entrance-scale', {
+                    property: 'scale',
+                    from: '0.82 0.82 0.82',
+                    to: '1 1 1',
+                    dur: 1100,
+                    easing: 'easeOutElastic',
+                    loop: false
+                });
+
+                // Entrance: smooth upward float
+                hologramGroup.setAttribute('animation__entrance-pos', {
+                    property: 'position',
+                    from: '0 0.28 0',
+                    to: '0 0.35 0',
+                    dur: 1100,
+                    easing: 'easeOutQuad',
+                    loop: false
+                });
+
+                // Individual layer fade-ins (staggered for depth)
+                // Logo
+                const logo = document.querySelector('#logo-plane');
+                if (logo) {
+                    logo.setAttribute('material', 'opacity: 0');
+                    logo.setAttribute('animation__fade-logo', {
+                        property: 'material.opacity',
+                        from: 0,
+                        to: 1,
+                        dur: 900,
+                        delay: 150,
+                        easing: 'easeOutQuad'
+                    });
+                }
+
+                // Company name
+                const nameText = document.querySelector('#company-name');
+                if (nameText) {
+                    nameText.setAttribute('opacity', '0');
+                    nameText.setAttribute('animation__fade-name', {
+                        property: 'opacity',
+                        from: 0,
+                        to: 1,
+                        dur: 800,
+                        delay: 350,
+                        easing: 'easeOutQuad'
+                    });
+                }
+
+                // Tagline
+                const taglineText = document.querySelector('#tagline-text');
+                if (taglineText) {
+                    taglineText.setAttribute('opacity', '0');
+                    taglineText.setAttribute('animation__fade-tagline', {
+                        property: 'opacity',
+                        from: 0,
+                        to: 1,
+                        dur: 800,
+                        delay: 500,
+                        easing: 'easeOutQuad'
+                    });
+                }
+
+                // Base glow also fades in smoothly
+                const baseGlow = document.querySelector('#base-glow');
+                if (baseGlow) {
+                    baseGlow.setAttribute('material', 'opacity: 0.05');
+                    baseGlow.setAttribute('animation__fade-base', {
+                        property: 'material.opacity',
+                        from: 0.05,
+                        to: 0.18,
+                        dur: 1200,
+                        delay: 50,
+                        easing: 'easeOutQuad'
+                    });
+                }
+            });
+
+            // === INTERACTIVE ICONS (tap with cursor + raycaster) ===
+            // All URLs are placeholders – replace with your real links
+            const iconConfigs = {
+                'icon-website': {
+                    type: 'web',
+                    url: 'https://yourcompany.com',
+                    name: 'Website'
+                },
+                'icon-email': {
+                    type: 'email',
+                    url: 'mailto:hello@yourcompany.com',
+                    name: 'Email'
+                },
+                'icon-instagram': {
+                    type: 'web',
+                    url: 'https://www.instagram.com/yourcompany',
+                    name: 'Instagram'
+                },
+                'icon-linkedin': {
+                    type: 'web',
+                    url: 'https://www.linkedin.com/company/yourcompany',
+                    name: 'LinkedIn'
+                }
+            };
+
+            Object.keys(iconConfigs).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('click', (evt) => {
+                        evt.stopImmediatePropagation();
+                        const config = iconConfigs[id];
+                        
+                        console.log(`%c🔗 Tapped ${config.name}`, 'color:#67e8f9');
+                        
+                        if (config.type === 'web') {
+                            window.open(config.url, '_blank');
+                        } else if (config.type === 'email') {
+                            window.location.href = config.url;
+                        }
+                    });
+                }
+            });
+
+            console.log('%c🚀 Premium holographic AR business card ready. All content now lives in 3D space above the card.', 'color:#67e8f9; font-size:13px');
         });
-      }
-    });
-
-    AFRAME.registerComponent('email-link', {
-      init: function () {
-        this.el.addEventListener('click', function () {
-          window.location.href = 'mailto:hello@yourcompanyname.com';
-        });
-      }
-    });
-
-    AFRAME.registerComponent('social-link', {
-      init: function () {
-        this.el.addEventListener('click', function () {
-          window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
-        });
-      }
-    });
-
-    window.addEventListener('load', () => {
-      const sceneEl = document.querySelector('a-scene');
-      const targetEl = document.querySelector('#target');
-      const loadingEl = document.getElementById('loading');
-
-      const showCard = () => {
-        targetEl.setAttribute('visible', 'true');
-        loadingEl.classList.add('hidden');
-        setTimeout(() => loadingEl.style.display = 'none', 350);
-      };
-
-      const hideCard = () => {
-        targetEl.setAttribute('visible', 'false');
-        loadingEl.style.display = 'flex';
-        loadingEl.classList.remove('hidden');
-        loadingEl.textContent = 'Scanning card…';
-      };
-
-      targetEl.addEventListener('targetFound', showCard);
-      targetEl.addEventListener('targetLost', hideCard);
-
-      sceneEl.addEventListener('renderstart', () => {
-        const camera = sceneEl.camera && sceneEl.camera.el;
-        if (camera) {
-          camera.setAttribute('position', '0 0 0');
-        }
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
