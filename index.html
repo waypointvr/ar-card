@@ -10,39 +10,71 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-body { margin:0; overflow:hidden; font-family: system-ui; }
+body {
+    margin:0;
+    overflow:hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui;
+}
 
-/* AR CAMERA */
+/* AR SCENE */
 .ar-scene {
     position: fixed;
     inset: 0;
     z-index: 1;
 }
 
-/* FLOATING UI */
+/* ===========================
+   🍎 APPLE-STYLE HOLOGRAM UI
+   =========================== */
+
 #ui-panel {
     position: fixed;
-    bottom: 25px;
+    bottom: 22px;
     left: 50%;
     transform: translateX(-50%);
-    width: 92%;
-    max-width: 420px;
+    width: 94%;
+    max-width: 440px;
     z-index: 10;
 
-    background: rgba(0,0,0,0.2);
-    backdrop-filter: blur(10px);
+    /* 🔥 darker, tighter glass */
+    background: rgba(10, 10, 15, 0.5);
+    backdrop-filter: blur(18px) saturate(180%);
 
-    border-radius: 24px;
-    border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    border-radius: 28px;
+    border: 1px solid rgba(255,255,255,0.12);
 
-    animation: floatUp .4s ease;
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.65),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+
+    overflow: hidden;
+
+    animation: floatUp .35s ease;
 }
 
 @keyframes floatUp {
-    from { transform: translate(-50%,40px); opacity:0; }
+    from { transform: translate(-50%,30px); opacity:0; }
     to { transform: translate(-50%,0); opacity:1; }
 }
+
+/* HEADER */
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 14px 16px 8px 16px;
+}
+
+.header img {
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+/* ===========================
+   📱 FULL BLEED CAROUSEL
+   =========================== */
 
 .carousel {
     display:flex;
@@ -51,10 +83,53 @@ body { margin:0; overflow:hidden; font-family: system-ui; }
     scroll-behavior:smooth;
 }
 
+/* MUCH LARGER SLIDES */
 .slide {
     min-width:100%;
-    padding:20px;
+    padding: 18px 18px 26px 18px;
     scroll-snap-align:start;
+}
+
+/* TEXT SYSTEM (Apple-like hierarchy) */
+h2 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+h3 {
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* VIDEO / MEDIA FULL WIDTH FEEL */
+.media {
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+/* ===========================
+   🌌 HOLOGRAPHIC GLOW BEHIND UI
+   =========================== */
+
+.holo-glow {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(56,189,248,0.35),
+        rgba(56,189,248,0.05),
+        transparent 70%
+    );
+    filter: blur(8px);
+
+    /* sits behind UI but in front of camera via AR scene */
+    pointer-events: none;
 }
 </style>
 </head>
@@ -72,52 +147,24 @@ device-orientation-permission-ui="enabled:false">
 
 <a-entity id="target" mindar-image-target="targetIndex: 0">
 
-<!-- BASE LOGO -->
+<!-- LOGO -->
 <a-plane position="0 0.2 0"
 width="0.6" height="0.3"
 material="src: ./logo.png; transparent:true">
 </a-plane>
 
-<!-- 🔵 GLOW RING -->
-<a-ring position="0 0 0"
-radius-inner="0.35"
-radius-outer="0.45"
+<!-- 🌌 SOFT HOLOGRAM GLOW (NO ANIMATION, JUST PRESENCE) -->
+<a-circle position="0 0 0.01"
+radius="0.6"
 color="#38bdf8"
-opacity="0.6">
+opacity="0.12">
+</a-circle>
 
-<a-animation attribute="rotation"
-to="0 360 0"
-dur="4000"
-repeat="indefinite"></a-animation>
-
-</a-ring>
-
-<!-- ✨ FLOATING PARTICLES -->
-<a-entity id="particles">
-<a-sphere radius="0.02" color="#38bdf8" position="-0.2 0.1 0"></a-sphere>
-<a-sphere radius="0.015" color="#7dd3fc" position="0.2 0.15 0"></a-sphere>
-<a-sphere radius="0.01" color="#bae6fd" position="0 0.25 0"></a-sphere>
-
-<a-animation attribute="position"
-dur="3000"
-direction="alternate"
-repeat="indefinite"
-to="0 0.4 0"></a-animation>
-</a-entity>
-
-<!-- 💡 PULSE BACKLIGHT -->
-<a-plane position="0 0.2 -0.01"
-width="0.8" height="0.5"
+<a-circle position="0 0 -0.01"
+radius="0.9"
 color="#38bdf8"
-opacity="0.15">
-
-<a-animation attribute="scale"
-to="1.1 1.1 1"
-dur="1200"
-direction="alternate"
-repeat="indefinite"></a-animation>
-
-</a-plane>
+opacity="0.06">
+</a-circle>
 
 </a-entity>
 </a-scene>
@@ -125,33 +172,35 @@ repeat="indefinite"></a-animation>
 <!-- FLOATING UI -->
 <div id="ui-panel" class="hidden text-white">
 
-<!-- HEADER -->
-<div class="flex justify-between items-center px-4 pt-3">
+<div class="header">
 <a href="https://www.waypoint-vr.com" target="_blank">
-<img src="./logo.png" class="w-10 h-10 rounded-xl cursor-pointer">
+<img src="./logo.png">
 </a>
-<button onclick="hideUI()">✕</button>
+<button onclick="hideUI()" style="color:white; font-size:18px;">✕</button>
 </div>
 
 <!-- CAROUSEL -->
 <div id="carousel" class="carousel">
 
+<!-- SLIDE 1 -->
 <div class="slide text-center">
-<img src="./logo.png" class="w-24 mx-auto mb-4">
-<h2 class="text-xl font-semibold">Waypoint VR</h2>
-<p class="text-sky-300">Immersive AR experiences</p>
+<img src="./logo.png" class="w-28 mx-auto mb-3 rounded-2xl">
+<h2>Waypoint VR</h2>
+<p class="text-sky-300 text-sm mt-1">Immersive AR experiences</p>
 </div>
 
+<!-- SLIDE 2 -->
 <div class="slide">
-<h3 class="mb-2">🎥 Demo</h3>
-<video controls class="w-full rounded-xl">
+<h3>Demo</h3>
+<video controls class="media">
 <source src="./AR Promo.mp4" type="video/mp4">
 </video>
 </div>
 
+<!-- SLIDE 3 -->
 <div class="slide">
-<h3 class="mb-4">Connect</h3>
-<div class="flex justify-around text-2xl">
+<h3>Connect</h3>
+<div class="flex justify-around text-2xl mt-4">
 <a href="https://www.facebook.com/waypointvr" target="_blank">
 <i class="fa-brands fa-facebook"></i>
 </a>
@@ -161,10 +210,11 @@ repeat="indefinite"></a-animation>
 </div>
 </div>
 
+<!-- SLIDE 4 -->
 <div class="slide text-center">
-<h3 class="mb-4">Contact</h3>
+<h3>Contact</h3>
 <a href="mailto:waypointvr605@gmail.com"
-class="bg-white text-black px-4 py-3 rounded-xl font-semibold block">
+class="block mt-4 bg-white text-black px-4 py-3 rounded-xl font-medium">
 waypointvr605@gmail.com
 </a>
 </div>
@@ -172,7 +222,7 @@ waypointvr605@gmail.com
 </div>
 
 <!-- CONTROLS -->
-<div class="flex justify-between px-6 pb-4 text-2xl">
+<div class="flex justify-between px-6 pb-4 text-2xl opacity-80">
 <button onclick="prev()">‹</button>
 <button onclick="next()">›</button>
 </div>
@@ -203,7 +253,6 @@ function hideUI(){
 
 window.addEventListener('load', () => {
     const target = document.querySelector('#target');
-
     target.addEventListener('targetFound', showUI);
 });
 </script>
